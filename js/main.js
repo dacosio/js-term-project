@@ -97,103 +97,72 @@ const movieRatingFilter = (ratingLeft, ratingRight, movies) => {
   );
 };
 
-const selectShowTimes = (movies) => {
+const transformResults = (count, filteredMovie) => {
   const eleven = "11am";
   const two = "2pm";
   const five = "5pm";
   const eight = "8pm";
 
+  const elevenPrice = 4.99;
+  const twoPrice = 6.99;
+  const fivePrice = 8.99;
+  const eightPrice = 11.99;
+  let tmpData = [];
+  if (filteredMovie.length > 0) {
+    let counter = 1;
+    let showtime = eleven;
+    let price = elevenPrice;
+    while (counter != count) {
+      tmpData = [
+        ...tmpData,
+        ...filteredMovie.map((mov) => {
+          return {
+            movieName: mov.title,
+            showtime,
+            price,
+          };
+        }),
+      ];
+      counter++;
+      if (showtime == eleven) {
+        showtime = two;
+        price = twoPrice;
+      } else if (showtime == two) {
+        showtime = five;
+        price = fivePrice;
+      } else if (showtime == five) {
+        showtime = eight;
+        price = eightPrice;
+      }
+    }
+  }
+  return tmpData;
+};
+
+const selectShowTimes = (movies) => {
   let results = [];
   const atLeastFour = movieRatingFilter(4, 6, movies);
   const atLeastSix = movieRatingFilter(6, 7, movies);
   const atLeastSeven = movieRatingFilter(7, 8, movies);
-
   const moreThanEight = movieRatingFilter(0, 8, movies);
+
+  console.table(atLeastFour);
+  console.table(atLeastSix);
+  console.table(atLeastSeven);
+  console.table(moreThanEight);
   if (atLeastFour.length > 0) {
-    results = [
-      ...results,
-      ...atLeastFour.map((four) => {
-        return {
-          movieName: four.title,
-          showtime: eleven,
-          price: 4.99,
-        };
-      }),
-    ];
+    results = [...results, ...transformResults(1, atLeastFour)];
   }
+
   if (atLeastSix.length > 0) {
-    let counter = 1;
-    let showtime = "11am";
-    let price = 4.99;
-    while (counter != 3) {
-      results = [
-        ...results,
-        ...atLeastSix.map((six) => {
-          return {
-            movieName: six.title,
-            showtime,
-            price,
-          };
-        }),
-      ];
-      counter++;
-      showtime = "2pm";
-      price = 6.99;
-    }
+    results = [...results, ...transformResults(3, atLeastSix)];
   }
 
   if (atLeastSeven.length > 0) {
-    let counter = 1;
-    let showtime = "11am";
-    let price = 4.99;
-    while (counter != 4) {
-      results = [
-        ...results,
-        ...atLeastSeven.map((seven) => {
-          return {
-            movieName: seven.title,
-            showtime,
-            price,
-          };
-        }),
-      ];
-      counter++;
-      if (showtime == "11am") {
-        showtime = "2pm";
-        price = 6.99;
-      } else if (showtime == "2pm") {
-        showtime = "5pm";
-        price = 8.99;
-      }
-    }
+    results = [...results, ...transformResults(4, atLeastSeven)];
   }
   if (moreThanEight.length > 0) {
-    let counter = 1;
-    let showtime = "11am";
-    let price = 4.99;
-    while (counter != 5) {
-      results = [
-        ...results,
-        ...moreThanEight.map((eight) => {
-          return {
-            movieName: eight.title,
-            showtime,
-            price,
-          };
-        }),
-      ];
-      counter++;
-      if (showtime == "11am") {
-        showtime = "2pm";
-        price = 6.99;
-      } else if (showtime == "2pm") {
-        showtime = "5pm";
-        price = 8.99;
-      } else if (showtime == "5pm") {
-        showtime = "8pm";
-        price = 11.99;
-      }
-    }
+    results = [...results, ...transformResults(5, moreThanEight)];
   }
   return results;
 };
@@ -203,7 +172,7 @@ const getMovies = async (url) => {
   const data = await res.json();
 
   movieObjectsArray = selectShowTimes(data.results);
-  console.log(movieObjectsArray);
+  console.table(movieObjectsArray);
 };
 
 getMovies(movieTrending);
