@@ -88,6 +88,7 @@ const movieTrending = `${baseUrl}trending/movie/week?api_key=${apiKey}`;
 // Populate the Movie Table - 10 marks
 
 const movieRatingFilter = (ratingLeft, ratingRight, movies) => {
+  // filter the movies base on the rating
   if (ratingLeft == 0) {
     return movies.filter((movie) => movie.vote_average > 8);
   }
@@ -108,11 +109,14 @@ const transformResults = (count, filteredMovie) => {
   const fivePrice = 8.99;
   const eightPrice = 11.99;
   let tmpData = [];
+  // transform the results to create a movie object
   if (filteredMovie.length > 0) {
     let counter = 1;
     let showtime = eleven;
     let price = elevenPrice;
+    // i used a counter since every designated rating has an equivalent number of how many times is the showtime
     while (counter != count) {
+      // I used spread operator to make deep copies of an object, then i enclose it to an array to save it to a single dimensional array
       tmpData = [
         ...tmpData,
         ...filteredMovie.map((mov) => {
@@ -124,15 +128,25 @@ const transformResults = (count, filteredMovie) => {
         }),
       ];
       counter++;
-      if (showtime == eleven) {
-        showtime = two;
-        price = twoPrice;
-      } else if (showtime == two) {
-        showtime = five;
-        price = fivePrice;
-      } else if (showtime == five) {
-        showtime = eight;
-        price = eightPrice;
+      switch (showtime) {
+        case eleven:
+          showtime = two;
+          price = twoPrice;
+          // i used break here to emulate an if/else condition
+          break;
+        case two:
+          showtime = five;
+          price = fivePrice;
+          break;
+        case five:
+          showtime = eight;
+          price = eightPrice;
+          break;
+        default:
+          // If showtime doesn't match any of the above cases, use this fallback
+          showtime = eleven;
+          price = elevenPrice;
+          break;
       }
     }
   }
@@ -146,23 +160,22 @@ const selectShowTimes = (movies) => {
   const atLeastSeven = movieRatingFilter(7, 8, movies);
   const moreThanEight = movieRatingFilter(0, 8, movies);
 
-  console.table(atLeastFour);
-  console.table(atLeastSix);
-  console.table(atLeastSeven);
-  console.table(moreThanEight);
-  if (atLeastFour.length > 0) {
-    results = [...results, ...transformResults(1, atLeastFour)];
-  }
-
-  if (atLeastSix.length > 0) {
-    results = [...results, ...transformResults(3, atLeastSix)];
-  }
-
-  if (atLeastSeven.length > 0) {
-    results = [...results, ...transformResults(4, atLeastSeven)];
-  }
-  if (moreThanEight.length > 0) {
-    results = [...results, ...transformResults(5, moreThanEight)];
+  switch (true) {
+    case atLeastFour.length > 0:
+      results = [...results, ...transformResults(1, atLeastFour)];
+    // I did not add a break here coz i want to continue the logic to the next condition
+    // this is the same as creating multiple if conditions
+    // ex. if(condition) {}
+    // if(condition) {} if(condition) {} and so on...
+    case atLeastSix.length > 0:
+      results = [...results, ...transformResults(3, atLeastSix)];
+    case atLeastSeven.length > 0:
+      results = [...results, ...transformResults(4, atLeastSeven)];
+    case moreThanEight.length > 0:
+      results = [...results, ...transformResults(5, moreThanEight)];
+    default:
+      // If none of the cases above match, do nothing (break is the equivalent of return in if/else)
+      break;
   }
   return results;
 };
@@ -171,35 +184,54 @@ const getMovies = async (url) => {
   const res = await fetch(url);
   const data = await res.json();
 
-  movieObjectsArray = selectShowTimes(data.results);
-  console.table(movieObjectsArray);
+  movieObjectsArray = selectShowTimes(data.results).sort((a, b) =>
+    a.movieName.localeCompare(b.movieName)
+  );
+  // localCompare() can also be rewritten as an if statement like below but localCompare is much cleaner for object sorting
+  // We can also use an npm called lodash or qs for more complex sorting
+  // EXAMPLE: if (a.movieName < b.movieName) {
+  //   return -1;
+  // } else if (a.movieName > b.movieName) {
+  //   return 1;
+  // } else {
+  //   return 0;
+  // }
 };
 
 getMovies(movieTrending);
 
-// ****************************************************************************
-// ****************************************************************************
-//  Function Variables
-
-// ****************************************************************************
-// ****************************************************************************
-//      Event Listeners
-// ****************************************************************************
-// ****************************************************************************
-//  Load Movie Array - 10 marks
 addMovie.addEventListener("click", () => {});
 
-// ****************************************************************************
-// ****************************************************************************
-//  View the Available Movies - 5 marks
-load.addEventListener("click", () => {});
+const reloadMovie = () => {
+  const currentObj = movieObjectsArray[currentIndex];
+  c2Movie.value = currentObj.movieName;
+  c2Time.value = currentObj.showtime;
+  c2Price.value = currentObj.price.toFixed(2);
+  next.disabled = false;
+  prev.disabled = false;
+};
 
-// ****************************************************************************
-// ****************************************************************************
-//  Navigate through the Showtimes - 5 marks each (so 15 marks for this section)
-next.addEventListener("click", () => {});
+load.addEventListener("click", reloadMovie);
 
-prev.addEventListener("click", () => {});
+const nextPage = () => {
+  currentIndex++;
+
+  if (currentIndex >= movieObjectsArray.length) {
+    currentIndex = 0;
+  }
+  reloadMovie();
+};
+
+next.addEventListener("click", nextPage);
+
+const previousPage = () => {
+  currentIndex--;
+  if (currentIndex < 0) {
+    currentIndex = movieObjectsArray.length - 1;
+  }
+  reloadMovie();
+};
+prev.addEventListener("click", previousPage);
 
 pickMovie.addEventListener("click", () => {});
 
