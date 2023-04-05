@@ -163,11 +163,12 @@ const selectShowTimes = (movies) => {
   switch (true) {
     case atLeastFour.length > 0:
       results = [...results, ...transformResults(1, atLeastFour)];
-    // I did not add a break here coz i want to continue the logic to the next condition
+    // I did not add break here coz i want to continue the logic to the next condition
     // this is the same as creating multiple if conditions
     // ex. if(condition) {}
     // if(condition) {} if(condition) {} and so on...
     case atLeastSix.length > 0:
+      // I used spread operator to make deep copies of an object, then i enclose it to an array to save it to a single dimensional array
       results = [...results, ...transformResults(3, atLeastSix)];
     case atLeastSeven.length > 0:
       results = [...results, ...transformResults(4, atLeastSeven)];
@@ -187,7 +188,7 @@ const getMovies = async (url) => {
   movieObjectsArray = selectShowTimes(data.results).sort((a, b) =>
     a.movieName.localeCompare(b.movieName)
   );
-  // localCompare() can also be rewritten as an if statement like below but localCompare is much cleaner for object sorting
+  // localCompare() can also be rewritten as an if statement like below but localCompare is much cleaner to look at for object sorting
   // We can also use an npm called lodash or qs for more complex sorting
   // EXAMPLE: if (a.movieName < b.movieName) {
   //   return -1;
@@ -209,33 +210,40 @@ const reloadMovie = () => {
   c2Price.value = currentObj.price.toFixed(2);
   next.disabled = false;
   prev.disabled = false;
+  pickMovie.disabled = false;
 };
 
 load.addEventListener("click", reloadMovie);
 
-const nextPage = () => {
+next.addEventListener("click", () => {
   currentIndex++;
 
   if (currentIndex >= movieObjectsArray.length) {
     currentIndex = 0;
   }
   reloadMovie();
-};
+});
 
-next.addEventListener("click", nextPage);
-
-const previousPage = () => {
+prev.addEventListener("click", () => {
   currentIndex--;
   if (currentIndex < 0) {
     currentIndex = movieObjectsArray.length - 1;
   }
   reloadMovie();
-};
-prev.addEventListener("click", previousPage);
+});
 
-pickMovie.addEventListener("click", () => {});
+pickMovie.addEventListener("click", () => {
+  c3Movie.value = c2Movie.value;
+  c3Time.value = c2Time.value;
+});
 
-// ****************************************************************************
-// ****************************************************************************
-//  Calculate Ticket Price - 10 marks
-calcTotal.addEventListener("click", () => {});
+calcTotal.addEventListener("click", () => {
+  // validation
+  if (+c3NumTickets.value % 1 != 0) {
+    alert("Please enter a whole number.");
+    c3NumTickets.value = 0;
+  }
+  // ticket price * number of tickets * 1.15
+  c3Total.value = (+c2Price.value * +c3NumTickets.value * 1.15).toFixed(2);
+  c3Output.innerText = `${c3NumTickets.value} Tickets (@$${c2Price.value} each) to see ${c3Movie.value} is ${c3Total.value}`;
+});
