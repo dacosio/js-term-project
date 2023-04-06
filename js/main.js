@@ -207,14 +207,44 @@ addMovie.addEventListener("click", () => {
   let newMoviePrice = (+c1Price.value).toFixed(2); // cast a number to test its validity
   if (newMovieName == "" || newMovieName == null) {
     alert("Enter a movie name");
+    return;
   }
   if (isNaN(newMoviePrice)) {
     alert("Enter a valid price.");
+    return;
   }
-  if (+newMovieTime >= 12) {
-    
+
+  let hours = +newMovieTime;
+  let amPm;
+
+  if (hours % 1 !== 0) {
+    alert("Invalid input. Please enter a whole number between 0 and 23.");
+    return;
   }
-  let lastTwo = newMovieTime.slice(-2);
+
+  // convert 24-hr time to am/pm strings
+  switch (true) {
+    case hours === 0:
+      hours = 12;
+      amPm = "am";
+      break;
+    case hours > 0 && hours < 12:
+      amPm = "am";
+      break;
+    case hours === 12:
+      hours = 12;
+      amPm = "pm";
+      break;
+    case hours > 12 && hours <= 23:
+      hours -= 12;
+      amPm = "pm";
+      break;
+    default:
+      alert("Invalid input. Please enter a number between 0 and 23.");
+      return;
+  }
+  newMovieTime = `${hours}${amPm}`;
+
   let movieObj = {
     movieName: newMovieName,
     showtime: newMovieTime,
@@ -222,14 +252,13 @@ addMovie.addEventListener("click", () => {
   };
 
   movieObjectsArray.push(movieObj);
-  console.log(movieObjectsArray);
 });
 
 const reloadMovie = () => {
   const currentObj = movieObjectsArray[currentIndex];
   c2Movie.value = currentObj.movieName;
   c2Time.value = currentObj.showtime;
-  c2Price.value = currentObj.price.toFixed(2);
+  c2Price.value = currentObj.price;
   next.disabled = false;
   prev.disabled = false;
   pickMovie.disabled = false;
