@@ -201,7 +201,29 @@ const getMovies = async (url) => {
 
 getMovies(movieTrending);
 
-addMovie.addEventListener("click", () => {});
+addMovie.addEventListener("click", () => {
+  let newMovieName = c1Movie.value;
+  let newMovieTime = c1Time.value;
+  let newMoviePrice = (+c1Price.value).toFixed(2); // cast a number to test its validity
+  if (newMovieName == "" || newMovieName == null) {
+    alert("Enter a movie name");
+  }
+  if (isNaN(newMoviePrice)) {
+    alert("Enter a valid price.");
+  }
+  if (+newMovieTime >= 12) {
+    
+  }
+  let lastTwo = newMovieTime.slice(-2);
+  let movieObj = {
+    movieName: newMovieName,
+    showtime: newMovieTime,
+    price: newMoviePrice,
+  };
+
+  movieObjectsArray.push(movieObj);
+  console.log(movieObjectsArray);
+});
 
 const reloadMovie = () => {
   const currentObj = movieObjectsArray[currentIndex];
